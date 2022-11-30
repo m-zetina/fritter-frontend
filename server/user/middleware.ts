@@ -79,15 +79,15 @@ const isAccountExists = async (req: Request, res: Response, next: NextFunction) 
  */
 const isUsernameNotAlreadyInUse = async (req: Request, res: Response, next: NextFunction) => {
   if (req.body.username !== undefined) { // If username is not being changed, skip this check
-    const user = await UserCollection.findOneByUsername(req.body.username);
+  const user = await UserCollection.findOneByUsername(req.body.username);
 
-    // If the current session user wants to change their username to one which matches
-    // the current one irrespective of the case, we should allow them to do so
+  // If the current session user wants to change their username to one which matches
+  // the current one irrespective of the case, we should allow them to do so
     if (user && (user?._id.toString() !== req.session.userId)) {
       res.status(409).json({
         error: 'An account with this username already exists.'
       });
-      return;
+    return;
     }
   }
 
@@ -144,6 +144,54 @@ const isAuthorExists = async (req: Request, res: Response, next: NextFunction) =
   next();
 };
 
+/**
+ * Checks if a user with userId is not already a follower of user in req.body
+ */
+const isUserAlreadyFollowing = async (req: Request, res: Response, next: NextFunction) => {
+  const activeUser = await UserCollection.findOneByUserId(req.session.userId);
+  const userToFollow = await UserCollection.findOneByUsername(req.body.username);
+
+  if (!userToFollow) {
+    res.status(404).json({
+      error: `User with username ${req.body.username as string} does not exist!`
+    });
+    return;
+  }
+
+  if (userToFollow.followers.includes(activeUser._id.toString())) {
+    res.status(403).json({
+      error: 'You are already following this user!'
+    });
+    return;
+  }
+
+  next();
+};
+
+/**
+ * Checks if a user with userId is follower of user in req.body
+ */
+const isUserFollowing = async (req: Request, res: Response, next: NextFunction) => {
+  const activeUser = await UserCollection.findOneByUserId(req.session.userId);
+  const userToUnfollow = await UserCollection.findOneByUsername(req.body.username);
+
+  if (!userToUnfollow) {
+    res.status(404).json({
+      error: `User with username ${req.body.username as string} does not exist!`
+    });
+    return;
+  }
+
+  if (!userToUnfollow.followers.includes(activeUser._id.toString())) {
+    res.status(403).json({
+      error: 'You are not following this user!'
+    });
+    return;
+  }
+
+  next();
+};
+
 export {
   isCurrentSessionUserExists,
   isUserLoggedIn,
@@ -152,5 +200,7 @@ export {
   isAccountExists,
   isAuthorExists,
   isValidUsername,
-  isValidPassword
+  isValidPassword,
+  isUserAlreadyFollowing,
+  isUserFollowing
 };

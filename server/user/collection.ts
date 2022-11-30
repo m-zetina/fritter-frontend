@@ -1,6 +1,7 @@
 import type {HydratedDocument, Types} from 'mongoose';
 import type {User} from './model';
 import UserModel from './model';
+import FeedCollection from '../feed/collection';
 
 /**
  * This file contains a class with functionality to interact with users stored
@@ -23,6 +24,7 @@ class UserCollection {
 
     const user = new UserModel({username, password, dateJoined});
     await user.save(); // Saves user to MongoDB
+    await FeedCollection.addOne(user._id);
     return user;
   }
 
@@ -90,6 +92,42 @@ class UserCollection {
   static async deleteOne(userId: Types.ObjectId | string): Promise<boolean> {
     const user = await UserModel.deleteOne({_id: userId});
     return user !== null;
+  }
+
+  /**
+   * Follow a user
+   *
+   * @param {string} username - The username of user to follow
+   * @param {string} followerId - The id of the new follower
+   * @return {Promise<HydratedDocument<User>>} - the updated follower object
+   */
+  static async followUser(username: string, followerId: Types.ObjectId | string): Promise<HydratedDocument<User>> {
+    const user = await UserModel.findOne({username});
+    const follower = await UserModel.findOne({_id: followerId});
+    user.followers.push(follower._id.toString());
+    follower.following.push(user._id.toString());
+    await user.save();
+    await follower.save();
+    return follower.populate('following');
+  }
+
+  /**
+   * Delete a user from your following
+   *
+   * @param {string} username - The username of user to delete
+   * @param {string} followerId - The user id of the followee
+   * @return {Promise<HydratedDocument<User>>} - the updated user object
+   */
+  static async removeFollowing(username: string, followerId: Types.ObjectId | string): Promise<HydratedDocument<User>> {
+    const user = await UserModel.findOne({username});
+    const follower = await UserModel.findOne({_id: followerId});
+    const userIx = follower.followers.indexOf(user._id.toString());
+    user.followers.splice(userIx, 1);
+    const followerIx = user.following.indexOf(follower._id.toString());
+    follower.following.splice(followerIx, 1);
+    await user.save();
+    await follower.save();
+    return user.populate('following');
   }
 }
 
