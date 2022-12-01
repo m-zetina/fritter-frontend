@@ -36,7 +36,7 @@ router.get(
 /**
  * Modify the feed's filter
  *
- * @name PUT /api/feed/:activeFilter
+ * @name PATCH /api/feeds/:activeFilter
  *
  * @param {string} activeFilter - the new active filter for the feed
  * @return {FeedResponse} - the updated feed
@@ -44,7 +44,7 @@ router.get(
  *                 of the feed
  * @throws {404} - If the feedId is not valid
  */
-router.put(
+router.patch(
   '/:activeFilter?',
   [
     userValidator.isUserLoggedIn,
@@ -52,7 +52,7 @@ router.put(
     feedValidator.isFeedOwner
   ],
   async (req: Request, res: Response) => {
-    const feed = await FeedCollection.updateActiveFilter(req.session.userId, req.params.activeFilter);
+    const feed = await FeedCollection.updateActiveFilter(req.session.userId, req.body.activeFilter);
     res.status(200).json({
       message: `Your feed will now show ${feed.activeFilter} freets.`,
       feed: util.constructFeedResponse(feed)

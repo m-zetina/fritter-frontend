@@ -12,6 +12,7 @@ export type User = {
   username: string;
   password: string;
   dateJoined: Date;
+  feed: string;
   following: string[];
   followers: string[];
 };
@@ -33,6 +34,11 @@ const UserSchema = new Schema({
   // The date the user joined
   dateJoined: {
     type: Date,
+    required: true
+  },
+  // Feed associated to the user
+  feed: {
+    type: String,
     required: true
   },
   // The list of people the user follows

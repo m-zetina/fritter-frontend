@@ -22,11 +22,9 @@ class FeedCollection {
   static async addOne(ownerId: Types.ObjectId | string): Promise<HydratedDocument<Feed>> {
     const lastRefresh = new Date();
     const freets = new Array<string>();
-    const filters: string[] = [];
     const activeFilter = 'latest';
     const feed = new FeedModel({
       ownerId,
-      filters,
       activeFilter,
       freets,
       lastRefresh
@@ -70,6 +68,7 @@ class FeedCollection {
     } else if (feed.activeFilter === 'following') {
       freets = await this.getFollowingFreets(ownerId);
     } else {
+      console.log('here')
       freets = await FreetCollection.findAllWithTag(feed.activeFilter);
     }
 

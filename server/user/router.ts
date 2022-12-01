@@ -9,8 +9,6 @@ const router = express.Router();
 
 /**
  * Get the signed in user
- * TODO: may need better route and documentation
- * (so students don't accidentally delete this when copying over)
  *
  * @name GET /api/users/session
  *
@@ -26,6 +24,26 @@ router.get(
       user: user ? util.constructUserResponse(user) : null
     });
   }
+);
+
+/**
+ * Get the signed in user's feed
+ * 
+ * @name GET /api/users/feed
+ * 
+ * @return - feed id of logged in user, or null if not logged in
+ */
+router.get(
+  '/feed',
+  [],
+  async (req: Request, res: Response) => {
+    const user = await UserCollection.findOneByUserId(req.session.userId);
+    res.status(200).json({
+      message: 'Your user feed was requested successfully.',
+      feed: user ? user.feed : null
+    }); 
+  }
+  
 );
 
 /**

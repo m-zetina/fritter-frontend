@@ -1,4 +1,4 @@
-import type {Types, PopulatedDoc, Document} from 'mongoose';
+import type {Types} from 'mongoose';
 import {Schema, model} from 'mongoose';
 import type {User} from '../user/model';
 
@@ -10,7 +10,6 @@ import type {User} from '../user/model';
 export type Feed = {
   _id: Types.ObjectId; // MongoDB assigns each object this ID on creation
   ownerId: Types.ObjectId;
-  filters: string[];
   activeFilter: string;
   freets: string[];
   lastRefresh: Date;
@@ -19,7 +18,6 @@ export type Feed = {
 export type PopulatedFeed = {
   _id: Types.ObjectId; // MongoDB assigns each object this ID on creation
   ownerId: User;
-  filters: string[];
   activeFilter: string;
   freets: string[];
   lastRefresh: Date;
@@ -35,11 +33,6 @@ const FeedSchema = new Schema<Feed>({
     type: Schema.Types.ObjectId,
     required: true,
     ref: 'User'
-  },
-  // Available filters to apply to the feed
-  filters: {
-    type: [String],
-    required: true
   },
   // Active filter being applied to the feed
   activeFilter: {

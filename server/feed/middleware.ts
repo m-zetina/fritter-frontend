@@ -1,5 +1,4 @@
 import type {Request, Response, NextFunction} from 'express';
-import {Types} from 'mongoose';
 import FeedCollection from '../feed/collection';
 import UserCollection from '../user/collection';
 

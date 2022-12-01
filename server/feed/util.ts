@@ -4,7 +4,6 @@ import type {Feed, PopulatedFeed} from './model';
 type FeedResponse = {
   _id: string;
   owner: string;
-  filters: string[];
   activeFilter: string;
   freets: string[];
 };

@@ -23,8 +23,9 @@ class UserCollection {
     const dateJoined = new Date();
 
     const user = new UserModel({username, password, dateJoined});
+    const feed = await FeedCollection.addOne(user._id);
+    user.feed = feed._id.toString();
     await user.save(); // Saves user to MongoDB
-    await FeedCollection.addOne(user._id);
     return user;
   }
 
