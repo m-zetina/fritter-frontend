@@ -45,13 +45,12 @@ const isValidFreetContent = (req: Request, res: Response, next: NextFunction) =>
  * Checks if the content of the freet in req.body is valid, i.e a comma seperated string
  */
  const isValidFreetTags = (req: Request, res: Response, next: NextFunction) => {
-  let {tags} = req.body as {tags: string};
-  tags = tags.trim();
+  let tags = req.body.tags as string;
   if (tags) {
     const tagsRegex = /^[\w]+(,[\w]+)*$/;
     if (!tagsRegex.test(tags)) {
       res.status(400).json({
-        error: 'Freet tags must be a comma separated string.'
+        error: 'Freet tags must be a comma separated string with no surrounding whitespace.'
       });
       return;
     }

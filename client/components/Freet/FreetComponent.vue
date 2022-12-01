@@ -15,9 +15,15 @@
       >
         <button
           v-if="editing"
-          @click="submitEdit"
+          @click="submitContentEdit"
         >
-          ✅ Save changes
+          ✅ Save content changes
+        </button>
+        <button
+          v-if="editing"
+          @click="submitTagsEdit"
+        >
+          ✅ Save tag changes
         </button>
         <button
           v-if="editing"
@@ -42,12 +48,27 @@
       :value="draft"
       @input="draft = $event.target.value"
     />
-    <p
+    <textarea
+      v-if="editing"
+      class="tags"
+      :value="freet.tags"
+      @input="tags = $event.target.value"
+    />
+    <section
       v-else
-      class="content"
     >
-      {{ freet.content }}
-    </p>
+      <p
+        class="content"
+      >
+        {{ freet.content }}
+      </p>
+      <p
+        class="tags"
+      >
+        #{{ freet.tags.join(' #') }}
+      </p>
+    </section>
+    
     <p class="info">
       Posted at {{ freet.dateModified }}
       <i v-if="freet.edited">(edited)</i>
@@ -88,6 +109,7 @@ export default {
        */
       this.editing = true; // Keeps track of if a freet is being edited
       this.draft = this.freet.content; // The content of our current "draft" while being edited
+      this.tags = this.freet.tags;
     },
     stopEditing() {
       /**
@@ -95,6 +117,7 @@ export default {
        */
       this.editing = false;
       this.draft = this.freet.content;
+      this.tags = this.freet.tags;
     },
     deleteFreet() {
       /**
@@ -110,7 +133,7 @@ export default {
       };
       this.request(params);
     },
-    submitEdit() {
+    submitContentEdit() {
       /**
        * Updates freet to have the submitted draft content.
        */
@@ -124,7 +147,31 @@ export default {
       const params = {
         method: 'PATCH',
         message: 'Successfully edited freet!',
+        url: `/api/freets/${this.freet._id}`,
         body: JSON.stringify({content: this.draft}),
+        callback: () => {
+          this.$set(this.alerts, params.message, 'success');
+          setTimeout(() => this.$delete(this.alerts, params.message), 3000);
+        }
+      };
+      this.request(params);
+    },
+    submitTagsEdit() {
+      /**
+       * Updates freet to have the submitted tags.
+       */
+      if (this.freet.tags === this.tags) {
+        const error = 'Error: Edited freet tags should be different than current freet tags.';
+        this.$set(this.alerts, error, 'error'); // Set an alert to be the error text, timeout of 3000 ms
+        setTimeout(() => this.$delete(this.alerts, error), 3000);
+        return;
+      }
+      
+      const params = {
+        method: 'PATCH',
+        message: 'Successfully edited freet tags!',
+        url: `/api/freets/tags/${this.freet._id}`,
+        body: JSON.stringify({tags: this.tags}),
         callback: () => {
           this.$set(this.alerts, params.message, 'success');
           setTimeout(() => this.$delete(this.alerts, params.message), 3000);
@@ -137,6 +184,7 @@ export default {
        * Submits a request to the freet's endpoint
        * @param params - Options for the request
        * @param params.body - Body for the request, if it exists
+       * @param params.url - URL for the request
        * @param params.callback - Function to run if the the request succeeds
        */
       const options = {
@@ -147,7 +195,7 @@ export default {
       }
 
       try {
-        const r = await fetch(`/api/freets/${this.freet._id}`, options);
+        const r = await fetch(params.url, options);
         if (!r.ok) {
           const res = await r.json();
           throw new Error(res.error);

@@ -18,6 +18,15 @@ const router = express.Router();
 /**
  * Get freets by author.
  *
+ * @name GET /api/freets?tag=tag
+ *
+ * @return {FreetResponse[]} - An array of freets created by user with tag, tag
+ * @throws {400} - If tag is not given
+ *
+ */
+/**
+ * Get freets by author.
+ *
  * @name GET /api/freets?author=username
  *
  * @return {FreetResponse[]} - An array of freets created by user with username, author
@@ -149,7 +158,7 @@ router.patch(
 /**
  * Modify a freet's tags
  *
- * @name PUT /api/freets/tags/:id
+ * @name PATCH /api/freets/tags/:id
  *
  * @param {string} tags - the new tags for the freet
  * @return {FreetResponse} - the updated freet
@@ -159,7 +168,7 @@ router.patch(
  * @throws {400} - If the freet content is empty or a stream of empty spaces
  * @throws {413} - If the freet content is more than 140 characters long
  */
- router.put(
+ router.patch(
   '/tags/:freetId?',
   [
     userValidator.isUserLoggedIn,
@@ -168,6 +177,7 @@ router.patch(
     freetValidator.isValidFreetTags
   ],
   async (req: Request, res: Response) => {
+    console.log('req', req.body)
     const tags = (req.body.tags as string).split(',');
     const freet = await FreetCollection.updateTags(req.params.freetId, tags);
     res.status(200).json({

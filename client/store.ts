@@ -5,14 +5,14 @@ import createPersistedState from 'vuex-persistedstate';
 Vue.use(Vuex);
 
 /**
- * Storage for data that needs to be accessed from various compoentns.
+ * Storage for data that needs to be accessed from various components.
  */
 const store = new Vuex.Store({
   state: {
     filter: null, // Username to filter shown freets by (null = show all)
     freets: [], // All freets created in the app
     username: null, // Username of the logged in user
-    alerts: {} // global success/error messages encountered during submissions to non-visible forms
+    alerts: {}, // global success/error messages encountered during submissions to non-visible forms
   },
   mutations: {
     alert(state, payload) {
